@@ -26,9 +26,18 @@ data class ChatResponse(
 )
 
 @Serializable
+data class Embedding(val embedding: List<Double>)
+
+@Serializable
 data class ChatRequest(
     val model: String,
     val messages: List<Message>
+)
+
+@Serializable
+data class EmbeddingRequest(
+    val model: String,
+    val prompt: String
 )
 
 @Serializable
@@ -44,5 +53,29 @@ enum class Role {
     @SerialName("system") SYSTEM,
     @SerialName("assistant") ASSISTANT
 }
+
+@Serializable
+data class Models(
+    val models: List<Model>
+)
+
+@Serializable
+data class Model(
+    val name: String,
+    val modified_at: String,
+    val size: Long,
+    val digest: String,
+    val details: ModelDetail
+)
+
+@Serializable
+data class ModelDetail(
+    val format: String,
+    val family: String,
+    val families: String?,
+    val parameter_size: String,
+    val quantization_level: String
+)
+
 
 

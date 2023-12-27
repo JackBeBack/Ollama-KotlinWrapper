@@ -24,3 +24,22 @@ fun String.toChatResponse(): ChatResponse? {
         null
     }
 }
+
+@OptIn(ExperimentalSerializationApi::class)
+fun String.toEmbedding(): Embedding? {
+    return try {
+        json.decodeFromString(this)
+    } catch (e: Exception) {
+        null
+    }
+}
+
+@OptIn(ExperimentalSerializationApi::class)
+fun String.toModels(): Models? {
+    return try {
+        json.decodeFromString(this)
+    } catch (e: Exception) {
+        null
+    }
+}
+

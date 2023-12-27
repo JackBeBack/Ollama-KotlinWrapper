@@ -131,7 +131,79 @@ class Ollama(val host: String = "localhost", val port: Int = 11434, val model: S
             }
         }
     }
+
+    /**
+     * @param prompt: The prompt to generate the embedding for
+     * @return The embedding of the prompt
+     */
+    @OptIn(InternalAPI::class)
+    suspend fun embedding(prompt: String): Embedding?{
+        if (_currentState.value == LLMSTATE.RUNNING) {
+            throw Exception("Already running")
+        }
+        val response: HttpResponse = client.post("http://$host:$port/api/embeddings") {
+            contentType(ContentType.Application.Json)
+            setBody(
+                json.encodeToString(
+                    EmbeddingRequest(
+                        model,
+                        prompt
+                    )
+                )
+            )
+        }
+
+        val channel: ByteReadChannel = response.content
+        var ret = Embedding(listOf())
+        try {
+            while (true) {
+                if (channel.availableForRead > 0) {
+                    val embedding = channel.readUTF8Line()?.toEmbedding()
+                    if (embedding != null) {
+                        ret = embedding
+                    }
+                }
+                if (channel.isClosedForRead) break
+                delay(50) // A small delay to prevent tight looping
+            }
+        } catch (_: Exception) {
+            // Handle specific exceptions here
+        }
+        return ret
+    }
+
+    /**
+     * @return The list of available models
+     */
+    @OptIn(InternalAPI::class)
+    suspend fun listModels(): Models{
+        if (_currentState.value == LLMSTATE.RUNNING) {
+            throw Exception("Already running")
+        }
+        val response: HttpResponse = client.get("http://$host:$port/api/tags") {
+            contentType(ContentType.Application.Json)
+        }
+
+        val channel: ByteReadChannel = response.content
+        var ret = Models(listOf())
+        try {
+            while (true) {
+                if (channel.availableForRead > 0) {
+                    val models = channel.readUTF8Line()?.toModels()
+                    if (models != null) {
+                        ret = models
+                    }
+                }
+                if (channel.isClosedForRead) break
+                delay(50) // A small delay to prevent tight looping
+            }
+        } catch (_: Exception) {
+            // Handle specific exceptions here
+        }
+        return ret
+    }
 }
+
 
 /**
  * State Class for the Llama Server

@@ -56,3 +56,21 @@ fun main() {
     }
 }
 ```
+
+### Create an Embedding
+```kotlin
+runBlocking {
+    val ollama = Ollama()
+    val embedding = ollama.embedding("Here is an article about llamas...")
+    println(embedding)
+}
+```
+
+### List available models
+```kotlin
+runBlocking {
+        val ollama = Ollama()
+        val models = ollama.listModels()
+        println(models)
+    }
+```
